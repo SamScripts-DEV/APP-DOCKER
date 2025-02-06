@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page - {{ node_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Sección de presentación -->
+        <header class="hero">
+            <h1>Bienvenido a Nuestra Landing Page</h1>
+            <p>Somos estudiantes apasionados por la tecnología y el desarrollo de software.</p>
+        </header>
+
+        <!-- Sección "Sobre Nosotros" -->
+        <section class="about-us">
+            <h2>Sobre Nosotros</h2>
+            <div class="profiles">
+                <div class="profile">
+                    <h3>Jhordy Aguas</h3>
+                    <p>Desarrollador Full Stack con experiencia en Python, Flask y Docker. Apasionado por construir soluciones que marcan la diferencia.</p>
+                    <ul>
+                        <li>Especialidad: Backend y DevOps</li>
+                        <li>Habilidades: Python, Flask, Docker</li>
+                        <li>Meta: Transformar ideas en realidades digitales</li>
+                    </ul>
+                </div>
+                <div class="profile">
+                    <h3>Samuel Cuti</h3>
+                    <p>Especialista en bases de datos y sistemas distribuidos. Siempre en busca de optimizar y mejorar procesos.</p>
+                    <ul>
+                        <li>Especialidad: Gestión de datos</li>
+                        <li>Habilidades: MySQL, PostgreSQL, Kubernetes</li>
+                        <li>Meta: Escalar proyectos de forma eficiente</li>
+                    </ul>
+                </div>
+            </div>
+            <p>
+                Combinamos nuestras habilidades para crear proyectos innovadores, desde aplicaciones web hasta sistemas escalables que solucionan problemas reales. Nuestra misión es hacer la tecnología accesible y útil para todos.
+            </p>
+        </section>
+
+        <!-- Formulario de contacto -->
+        <section class="contact-form">
+            <h2>¿Tienes una idea para un proyecto?</h2>
+            <p>¡Nos encantaría escucharla! Completa el formulario y nos pondremos en contacto contigo.</p>
+            <form method="POST">
+                <label for="first_name">Nombre:</label>
+                <input type="text" id="first_name" name="first_name" required>
+
+                <label for="last_name">Apellido:</label>
+                <input type="text" id="last_name" name="last_name" required>
+
+                <label for="phone">Número de Celular:</label>
+                <input type="tel" id="phone" name="phone" required>
+
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="project_idea">Describe tu idea:</label>
+                <textarea id="project_idea" name="project_idea" rows="4" required></textarea>
+
+                <button type="submit" class="btn-submit">Enviar</button>
+            </form>
+        </section>
+
+        <!-- Sección de respuestas -->
+        <section class="responses">
+            <h2>Ideas enviadas por otros usuarios:</h2>
+            <ul>
+                {% for request in contact_requests %}
+                    <li>
+                        <strong>{{ request.first_name }} {{ request.last_name }}:</strong> {{ request.project_idea }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

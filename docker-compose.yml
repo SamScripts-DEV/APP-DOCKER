@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # Aplicación Web (3 nodos)
+  web1:
+    build: ./app
+    environment:
+      - DB_HOST=db-master
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - NODE_NAME=web1
+    depends_on:
+      - db-master
+    networks:
+      - app-network
+    ports:
+      - "8001:80"
+
+  web2:
+    build: ./app
+    environment:
+      - DB_HOST=db-master
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - NODE_NAME=web2
+    depends_on:
+      - db-master
+    networks:
+      - app-network
+    ports:
+    - "8002:80"
+
+  web3:
+    build: ./app
+    environment:
+      - DB_HOST=db-master
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - NODE_NAME=web3
+    depends_on:
+      - db-master
+    networks:
+      - app-network
+    ports:
+      - "8003:80"
+
+  # Balanceador de Carga NGINX
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web1
+      - web2
+      - web3
+    networks:
+      - app-network
+
+  # Base de Datos Maestra
+  db-master:
+    image: mysql:8.0
+    container_name: db-master
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+    networks:
+      - app-network
+    command: --server-id=1 --log-bin=mysql-bin --binlog-do-db=mydb
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    
+
+  # Base de Datos Esclava
+  db-slave:
+    image: mysql:8.0
+    container_name: db-slave
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+    networks:
+      - app-network
+    command: --server-id=2 --log-bin=mysql-bin --binlog-do-db=mydb
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql  
+      
+  # phpMyAdmin para la base de datos maestra
+  phpmyadmin-master:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=db-master
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    ports:
+      - "8081:80"
+    depends_on:
+      - db-master
+    networks:
+      - app-network
+
+  # phpMyAdmin para la base de datos esclava
+  phpmyadmin-slave:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=db-slave
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    ports:
+      - "8082:80"
+    depends_on:
+      - db-slave
+    networks:
+      - app-network
+
+  locust:
+    image: locustio/locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locustfile.py:/locustfile.py
+    command: -f /locustfile.py --host http://nginx
+    depends_on:
+      - nginx
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
